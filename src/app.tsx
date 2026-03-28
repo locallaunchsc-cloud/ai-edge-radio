@@ -1,6 +1,25 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useAgent } from "agents/react";
 import type { RadioState } from "./agents/radio";
+
+function Visualizer() {
+  return (
+    <div className="visualizer">
+      {Array.from({ length: 7 }).map((_, i) => (
+        <div key={i} className="bar" />
+      ))}
+    </div>
+  );
+}
+
+function ProgressBar({ current, total }: { current: number; total: number }) {
+  const pct = total > 0 ? ((current + 1) / total) * 100 : 0;
+  return (
+    <div className="progress-bar">
+      <div className="fill" style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
 
 export function App() {
   const [url, setUrl] = useState("");
@@ -60,47 +79,90 @@ export function App() {
     error: "Something went wrong",
   };
 
+  const isLoading = ["fetching", "scripting", "generating"].includes(radioState.status);
+  const audioReadyCount = radioState.segments.filter((s) => s.audioUrl).length;
+
   return (
     <div className="container">
       <header>
+        <div className="logo-icon">📻</div>
         <h1>AI Edge Radio</h1>
         <p className="subtitle">Turn any website or topic into a live AI radio show</p>
       </header>
 
       <div className="input-section">
         <div className="mode-toggle">
-          <button className={mode === "url" ? "active" : ""} onClick={() => setMode("url")}>URL</button>
-          <button className={mode === "topic" ? "active" : ""} onClick={() => setMode("topic")}>Topic</button>
+          <button className={mode === "url" ? "active" : ""} onClick={() => setMode("url")}>
+            URL
+          </button>
+          <button className={mode === "topic" ? "active" : ""} onClick={() => setMode("topic")}>
+            Topic
+          </button>
         </div>
-
         {mode === "url" ? (
-          <input type="text" placeholder="Paste a URL (blog, news, docs...)" value={url} onChange={(e) => setUrl(e.target.value)} />
+          <input
+            type="text"
+            placeholder="Paste a URL (blog, news, docs...)"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+          />
         ) : (
-          <input type="text" placeholder="Enter a topic (AI news, crypto, sports...)" value={topic} onChange={(e) => setTopic(e.target.value)} />
+          <input
+            type="text"
+            placeholder="Enter a topic (AI news, crypto, sports...)"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+          />
         )}
-
         <div className="actions">
-          <button className="generate-btn" onClick={handleGenerate} disabled={radioState.status !== "idle" && radioState.status !== "ready" && radioState.status !== "error"}>Generate Show</button>
-          <button className="reset-btn" onClick={handleReset}>Reset</button>
+          <button
+            className="generate-btn"
+            onClick={handleGenerate}
+            disabled={isLoading}
+          >
+            {isLoading ? "Generating..." : "Generate Show"}
+          </button>
+          <button className="reset-btn" onClick={handleReset}>
+            Reset
+          </button>
         </div>
       </div>
 
-      <div className="status">{statusText[radioState.status] || radioState.status}</div>
+      <div className={`status-bar${isLoading ? " loading" : ""}`}>
+        {statusText[radioState.status] || radioState.status}
+      </div>
+
+      {isLoading && <Visualizer />}
+
       {radioState.error && <div className="error">{radioState.error}</div>}
 
       {radioState.segments.length > 0 && (
         <div className="segments">
-          <h2>Show Segments</h2>
+          <h2>Show Segments ({audioReadyCount}/{radioState.segments.length} ready)</h2>
+
+          {isPlaying && <ProgressBar current={currentSegment} total={radioState.segments.length} />}
+
           {radioState.segments.map((seg, i) => (
-            <div key={i} className={"segment" + (i === currentSegment && isPlaying ? " playing" : "")}>
+            <div
+              key={i}
+              className={"segment" + (i === currentSegment && isPlaying ? " playing" : "")}
+            >
               <div className="segment-role">{seg.role.toUpperCase()}</div>
               <div className="segment-title">{seg.title}</div>
               <div className="segment-script">{seg.script}</div>
               {seg.audioUrl && <span className="audio-ready">Audio ready</span>}
             </div>
           ))}
+
           {radioState.status === "ready" && (
-            <button className="play-btn" onClick={playAll} disabled={isPlaying}>{isPlaying ? "Playing..." : "Play All"}</button>
+            <>
+              {isPlaying && <Visualizer />}
+              <button className="play-btn" onClick={playAll} disabled={isPlaying}>
+                {isPlaying ? `Playing segment ${currentSegment + 1}/${radioState.segments.length}...` : "▶ Play All"}
+              </button>
+            </>
           )}
         </div>
       )}
@@ -108,7 +170,9 @@ export function App() {
       <audio ref={audioRef} />
 
       <footer>
-        <p>Built with Cloudflare Workers + Agents + ElevenLabs for ElevenHacks</p>
+        <p>
+          Built with <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener">Cloudflare Workers</a> + <a href="https://developers.cloudflare.com/agents/" target="_blank" rel="noopener">Agents</a> + <a href="https://elevenlabs.io" target="_blank" rel="noopener">ElevenLabs</a> for ElevenHacks
+        </p>
       </footer>
     </div>
   );
