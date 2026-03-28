@@ -1,0 +1,32 @@
+{
+  "name": "ai-edge-radio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "agents": "^0.0.83",
+    "@cloudflare/ai-chat": "^0.0.10",
+    "@elevenlabs/elevenlabs-js": "^1.56.0",
+    "workers-ai-provider": "^0.0.14",
+    "ai": "^4.3.16",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250313.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.2.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "wrangler": "^4.0.0"
+  }
+}
