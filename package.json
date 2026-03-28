@@ -4,21 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "vite build",
     "start": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "vite build && wrangler deploy",
     "preview": "vite preview"
   },
   "dependencies": {
-    "agents": "^0.0.83",
-    "@cloudflare/ai-chat": "^0.0.10",
-    "@elevenlabs/elevenlabs-js": "^1.56.0",
+    "agents": "*",
+    "@cloudflare/ai-chat": "*",
+    "@elevenlabs/elevenlabs-js": "^2.40.0",
     "workers-ai-provider": "^0.0.14",
-    "ai": "^4.3.16",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "hono": "^4.7.0"
+    "ai": "^6.0.141",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250313.0",
